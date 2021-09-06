@@ -7,7 +7,7 @@
         <!-- shopnavbar -->
  <div>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-      <router-link class="navbar-brand col-sm-3 col-md-2 mr-0" to="/customer/shop">塊樂根源123</router-link>
+      <router-link class="navbar-brand col-sm-3 col-md-2 mr-0" to="/customer/shop">塊樂根源</router-link>
       <div class="userinfo dropdown px-3">
         <a class="btn btn-secondary dropdown-toggle" 
         role="button" 
