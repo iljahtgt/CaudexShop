@@ -1,0 +1,66 @@
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  
+}
+
+div.userinfo {
+  margin-left: 63%;
+}
+// customerOrder
+div.div-right {
+  text-align: right;
+  float: right;
+}
+
+hr {
+  clear: both;
+}
+div.my-5.row.justify-content-center.mt-5 {
+  clear: both;
+}
+
+// customercheckout
+
+//shopindex
+
+div.shopindex {
+  background: url("~@/assets/caudexproducts/index.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  /* Full height */
+  background-size: cover;
+  -o-background-size: cover;
+  -moz-background-size: cover;
+  -webkit-background-size: cover;
+  position: absolute;
+}
+
+div.bg-text {
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/opacity/see-through */
+  color: white;
+  font-weight: bold;
+  border: 3px solid #f1f1f1;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 60%;
+  height: 60%;
+  padding: 20px;
+  text-align: center;
+}
