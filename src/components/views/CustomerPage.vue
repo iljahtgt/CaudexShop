@@ -217,18 +217,20 @@
                     </div>
                   </div>
                   </div>
-                  <select
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <div>數量</div>
+                 <select
                     name=""
-                    class="form-control mt-3"
+                    class="form-control w-25 m-0"
                     v-model="product.num"
                   >
                     <option :value="num" v-for="num in 10" :key="num">
                       選購 {{ num }} {{ product.unit }}
                     </option>
                   </select>
-                </div>
-              </div>
-              <div class="modal-footer">
                 <div class="text-muted text-nowrap mr-3">
                   小計 <strong>{{ product.num * product.price }}</strong>
                 </div>
@@ -283,13 +285,13 @@ export default {
       }
       return this.products;
     },
-    ...mapGetters(['categories', 'products']),
+    ...mapGetters(['categories', 'products', 'product']),
     cart() {
       return this.$store.state.cart; 
     }
   },
   methods: {
-    ...mapActions(['getProducts']),
+    ...mapActions(['getProducts', 'getNote']),
     signout() {
       const vm = this;
       const api = `${process.env.APIPATH}/logout`;
@@ -308,18 +310,6 @@ export default {
     },
     removeCart(id) {
       this.$store.dispatch("removeCart", id);
-    },
-    getNote(id) {
-      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/product/${id}`;
-      const vm = this;
-      vm.$store.dispatch("updateLoading", true);
-      //   console.log(id);
-      this.$http.get(api).then((response) => {
-        // console.log(response.data.product);
-        vm.product = response.data.product;
-        $("#seeNoteModal").modal("show");
-        vm.$store.dispatch("updateLoading", false);
-      });
     },
   },
   created() {

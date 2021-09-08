@@ -11,6 +11,7 @@ export default new Vuex.Store({
     state:{
         isLoading: false,
         products:[],
+        product:{},
         categories:[],
         cart: {
             carts:[],
@@ -50,7 +51,6 @@ export default new Vuex.Store({
             });
           },
           addtoCart(context, {id, qty}) {
-            const vm = this;
             const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
             context.commit('LOADING', true);
             const item = {
@@ -62,6 +62,17 @@ export default new Vuex.Store({
               context.dispatch('getCart');
               console.log("加入購物車:", response);
               $("#seeNoteModal").modal("hide");
+            });
+          },
+          getNote(context, id) {
+            const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/product/${id}`;
+            context.commit('LOADING', true);
+            //   console.log(id);
+            axios.get(api).then((response) => {
+              // console.log(response.data.product);
+              context.commit('PRODUCT', response.data.products);
+              $("#seeNoteModal").modal("show");
+              context.commit('LOADING', false);
             });
           },
     },
@@ -77,6 +88,9 @@ export default new Vuex.Store({
           return item.is_enabled === 1
         })
             // state.products = payload;
+        },
+        PRODUCT(state, payload){
+          state.product = payload;
         },
         CATEGORIES(state, payload){
             const categories = new Set();
@@ -95,6 +109,9 @@ export default new Vuex.Store({
         },
         products(state){
             return state.products;
+        },
+        product(state){
+          return state.product;
         },
     }
 });
