@@ -10,11 +10,14 @@ import { extend, ValidationProvider, ValidationObserver, localize, configure} fr
 import {required, email} from 'vee-validate/dist/rules';
 import zhTW from 'vee-validate/dist/locale/zh_TW.json';
 import * as rules from 'vee-validate/dist/rules';
+import Vuex from 'vuex';
+
 
 import App from './App';
 import router from './router';
 import './bus';
 import currencyFilter from './filters/currency';
+import store from './store';
 
 extend('email', email);
 extend('required',{
@@ -37,6 +40,7 @@ localize("zh_TW", zhTW);
 
 Vue.config.productionTip = false
 Vue.use(VueAxios, axios);
+Vue.use(Vuex);
 Vue.component('Loading', Loading);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.component('ValidationProvider', ValidationProvider);
@@ -54,6 +58,7 @@ axios.defaults.withCredentials = true;
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 });

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+        <Loading :active.sync="isLoading"></Loading>
     <router-view/>
   </div>
 </template>
@@ -13,6 +14,11 @@ export default {
     this.$http.get(api).then((response)=>{
       console.log(response.data);
     });
+  },
+  computed:{
+    isLoading() {
+      return this.$store.state.isLoading;
+    },
   }
 }
 </script>
