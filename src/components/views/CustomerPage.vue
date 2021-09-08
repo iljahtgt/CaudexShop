@@ -1,6 +1,10 @@
 <template>
   <div>
     <div class="main-content mb-3">
+      <!-- <ShopNavBar /> -->
+      <!-- <ShopNavBar :cartlength="cart.carts.length"/> -->
+      <Loading :active.sync="isLoading"></Loading>
+        <!-- shopnavbar -->
  <div>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
       <router-link class="navbar-brand col-sm-3 col-md-2 mr-0" to="/customer/shop">塊樂根源</router-link>
@@ -17,10 +21,6 @@
           <a class="dropdown-item text-primary" href="#" @click.prevent="signout"
             >Sign out</a
           >
-          <router-link class="nav-link" to="/main/coupon">
-          <i class="fas fa-box-open"></i>
-          優惠券
-        </router-link>
         </div>
       </div>
 
@@ -38,6 +38,11 @@
           <span class="badge badge-pill badge-danger">{{
             cart.carts.length
           }}</span>
+          <!-- props練習 -->
+<!-- props cart.length -->
+          <!-- <span class="badge badge-pill badge-danger">{{
+            cartlength
+          }}</span> -->
           <span class="sr-only">購物去</span>
         </button>
         <div
@@ -88,7 +93,6 @@
       <!-- 購物車 -->
     </nav>
   </div>
-
   <div class="w-100 mx-auto">
     <img src="~@/assets/caudexproducts/ba.png" class="w-100" alt="">
   </div>
@@ -217,20 +221,18 @@
                     </div>
                   </div>
                   </div>
-                </div>
-              </div>
-              
-              <div class="modal-footer">
-                <div>數量</div>
-                 <select
+                  <select
                     name=""
-                    class="form-control w-25 m-0"
+                    class="form-control mt-3"
                     v-model="product.num"
                   >
                     <option :value="num" v-for="num in 10" :key="num">
                       選購 {{ num }} {{ product.unit }}
                     </option>
                   </select>
+                </div>
+              </div>
+              <div class="modal-footer">
                 <div class="text-muted text-nowrap mr-3">
                   小計 <strong>{{ product.num * product.price }}</strong>
                 </div>
@@ -251,22 +253,27 @@
 <script>
 import ShopNavBar from "@/components/views/ShopNavBar.vue";
 import AlertMessage from "../AlertMessage.vue";
-import $ from "jquery";
-import { mapGetters, mapActions} from 'vuex';
+import $ from 'jquery';
 
 export default {
-  name: "Home",
+  name: 'Home',
   components: {
     ShopNavBar,
     AlertMessage,
   },
   data() {
     return {
-      searchText: "",
+      products: [],
+      searchText: '',
+      categories: [],
+      isLoading: false,
       status: {
         loadingItem: "",
       },
-      cartlength: "",
+      cart: {
+        carts:[],
+      },
+      cartlength:'',
     };
   },
   computed: {
@@ -274,24 +281,32 @@ export default {
       const vm = this;
       if (vm.searchText) {
         return vm.products.filter((item) => {
-          console.log(vm.searchText);
-          console.log(item.category);
-          const data = item.category
-            .toLowerCase()
-            .includes(vm.searchText.toLowerCase());
+            console.log(vm.searchText);
+            console.log(item.category);
+          const data = item.category.toLowerCase().includes(vm.searchText.toLowerCase());
           console.log(data);
           return data;
         });
       }
       return this.products;
     },
-    ...mapGetters(['categories', 'products', 'product']),
-    cart() {
-      return this.$store.state.cart; 
-    }
   },
   methods: {
-    ...mapActions(['getProducts', 'getNote']),
+    getProducts() {
+      const vm = this;
+      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/products/all`;
+      vm.isLoading = true;
+      this.$http.get(url).then((response) => {
+        const temp = response.data.products;
+        vm.products = temp.filter((item) => {
+          return item.is_enabled === 1
+        })
+        // vm.products = response.data.products;
+        // console.log('取得產品列表:', response);
+        vm.getUnique();
+        vm.isLoading = false;
+      });
+    },
     signout() {
       const vm = this;
       const api = `${process.env.APIPATH}/logout`;
@@ -303,13 +318,62 @@ export default {
       });
     },
     getCart() {
-      this.$store.dispatch("getCart");
+      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
+      const vm = this;
+      console.log(process.env.APIPATH, process.env.CUSTOMPATH);
+      vm.isLoading = true;
+      this.$http.get(api).then((response) => {
+        console.log("cart:", response.data.data.carts.length);
+        vm.isLoading = false;
+        vm.cart = response.data.data;
+      });
     },
     addtoCart(id, qty = 1) {
-      this.$store.dispatch("addtoCart", {id, qty});  
+      const vm = this;
+      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
+      vm.isLoading = true;
+      const item = {
+        product_id: id,
+        qty,
+      };
+      vm.isLoading = true;
+      this.$http.post(url, { data: item }).then((response) => {
+        vm.isLoading = false;
+        vm.getCart();
+        console.log('加入購物車:', response);
+        $("#seeNoteModal").modal("hide");
+      });
     },
     removeCart(id) {
-      this.$store.dispatch("removeCart", id);
+      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart/${id}`;
+      const vm = this;
+      console.log(process.env.APIPATH, process.env.CUSTOMPATH);
+      vm.isLoading = true;
+      this.$http.delete(api).then((response) => {
+        console.log(response.data);
+        vm.isLoading = false;
+        vm.getCart();
+      });
+    },
+    getNote(id) {
+      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/product/${id}`;
+      const vm = this;
+      vm.isLoading = true;
+      //   console.log(id);
+      this.$http.get(api).then((response) => {
+        // console.log(response.data.product);
+        vm.product = response.data.product;
+        $("#seeNoteModal").modal("show");
+        vm.isLoading = false;
+      });
+    },
+    getUnique() {
+      const vm = this;
+      const categories = new Set();
+      vm.products.forEach((item) => {
+        categories.add(item.category);
+      });
+      vm.categories = Array.from(categories);
     },
   },
   created() {
