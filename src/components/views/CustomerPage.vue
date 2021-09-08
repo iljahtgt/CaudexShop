@@ -1,10 +1,6 @@
 <template>
   <div>
     <div class="main-content mb-3">
-      <!-- <ShopNavBar /> -->
-      <!-- <ShopNavBar :cartlength="cart.carts.length"/> -->
-      <Loading :active.sync="isLoading"></Loading>
-        <!-- shopnavbar -->
  <div>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
       <router-link class="navbar-brand col-sm-3 col-md-2 mr-0" to="/customer/shop">塊樂根源</router-link>
@@ -42,10 +38,6 @@
           <span class="badge badge-pill badge-danger">{{
             cart.carts.length
           }}</span>
-<!-- props cart.length -->
-          <!-- <span class="badge badge-pill badge-danger">{{
-            cartlength
-          }}</span> -->
           <span class="sr-only">購物去</span>
         </button>
         <div
@@ -95,6 +87,10 @@
       </div>
       <!-- 購物車 -->
     </nav>
+  </div>
+
+  <div class="w-100 mx-auto">
+    <img src="~@/assets/caudexproducts/ba.png" class="w-100" alt="">
   </div>
           <!-- shopnavbar -->
       <div class="row">
@@ -253,25 +249,22 @@
 <script>
 import ShopNavBar from "@/components/views/ShopNavBar.vue";
 import AlertMessage from "../AlertMessage.vue";
-import $ from 'jquery';
+import $ from "jquery";
+import { mapGetters, mapActions} from 'vuex';
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
     ShopNavBar,
     AlertMessage,
   },
   data() {
     return {
-      products: [],
-      searchText: '',
-      categories: [],
-      isLoading: false,
+      searchText: "",
       status: {
         loadingItem: "",
       },
-      cart: [],
-      cartlength:'',
+      cartlength: "",
     };
   },
   computed: {
@@ -279,32 +272,24 @@ export default {
       const vm = this;
       if (vm.searchText) {
         return vm.products.filter((item) => {
-            console.log(vm.searchText);
-            console.log(item.category);
-          const data = item.category.toLowerCase().includes(vm.searchText.toLowerCase());
+          console.log(vm.searchText);
+          console.log(item.category);
+          const data = item.category
+            .toLowerCase()
+            .includes(vm.searchText.toLowerCase());
           console.log(data);
           return data;
         });
       }
       return this.products;
     },
+    ...mapGetters(['categories', 'products']),
+    cart() {
+      return this.$store.state.cart; 
+    }
   },
   methods: {
-    getProducts() {
-      const vm = this;
-      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/products/all`;
-      vm.isLoading = true;
-      this.$http.get(url).then((response) => {
-        const temp = response.data.products;
-        vm.products = temp.filter((item) => {
-          return item.is_enabled === 1
-        })
-        // vm.products = response.data.products;
-        // console.log('取得產品列表:', response);
-        vm.getUnique();
-        vm.isLoading = false;
-      });
-    },
+    ...mapActions(['getProducts']),
     signout() {
       const vm = this;
       const api = `${process.env.APIPATH}/logout`;
@@ -316,62 +301,25 @@ export default {
       });
     },
     getCart() {
-      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
-      const vm = this;
-      console.log(process.env.APIPATH, process.env.CUSTOMPATH);
-      vm.isLoading = true;
-      this.$http.get(api).then((response) => {
-        console.log("cart:", response.data.data.carts.length);
-        vm.isLoading = false;
-        vm.cart = response.data.data;
-      });
+      this.$store.dispatch("getCart");
     },
     addtoCart(id, qty = 1) {
-      const vm = this;
-      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
-      vm.isLoading = true;
-      const item = {
-        product_id: id,
-        qty,
-      };
-      vm.isLoading = true;
-      this.$http.post(url, { data: item }).then((response) => {
-        vm.isLoading = false;
-        vm.getCart();
-        console.log('加入購物車:', response);
-        $("#seeNoteModal").modal("hide");
-      });
+      this.$store.dispatch("addtoCart", {id, qty});  
     },
     removeCart(id) {
-      const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart/${id}`;
-      const vm = this;
-      console.log(process.env.APIPATH, process.env.CUSTOMPATH);
-      vm.isLoading = true;
-      this.$http.delete(api).then((response) => {
-        console.log(response.data);
-        vm.isLoading = false;
-        vm.getCart();
-      });
+      this.$store.dispatch("removeCart", id);
     },
     getNote(id) {
       const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/product/${id}`;
       const vm = this;
-      vm.isLoading = true;
+      vm.$store.dispatch("updateLoading", true);
       //   console.log(id);
       this.$http.get(api).then((response) => {
         // console.log(response.data.product);
         vm.product = response.data.product;
         $("#seeNoteModal").modal("show");
-        vm.isLoading = false;
+        vm.$store.dispatch("updateLoading", false);
       });
-    },
-    getUnique() {
-      const vm = this;
-      const categories = new Set();
-      vm.products.forEach((item) => {
-        categories.add(item.category);
-      });
-      vm.categories = Array.from(categories);
     },
   },
   created() {
